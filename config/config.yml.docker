@@ -1,0 +1,127 @@
+database:
+  host: ${DATABASE_HOST}
+  port: ${DATABASE_PORT}
+  user: ${DATABASE_USER}
+  password: ${DATABASE_PASSWORD}
+  database: ${DATABASE_NAME}
+  sslmode: disable
+prebooking:
+  enable: ${TASK_PREBOOKING_ENABLE}
+  source:
+    host: ${PREBOOKING_DATABASE_HOST}
+    port: ${PREBOOKING_DATABASE_PORT}
+    user: ${PREBOOKING_DATABASE_USER}
+    password: ${PREBOOKING_DATABASE_PASSWORD}
+    database: ${PREBOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: bookings
+      to: prebookings
+booking:
+  enable: ${TASK_BOOKING_ENABLE}
+  source:
+    host: ${BOOKING_DATABASE_HOST}
+    port: ${BOOKING_DATABASE_PORT}
+    user: ${BOOKING_DATABASE_USER}
+    password: ${BOOKING_DATABASE_PASSWORD}
+    database: ${BOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: booking
+      to: booking
+    - from: si
+      to: si
+    - from: vgm
+      to: vgm
+booking_confirm:
+  enable: ${TASK_BOOKING_CONFIRM_ENABLE}
+  source:
+    host: ${BOOKING_DATABASE_HOST}
+    port: ${BOOKING_DATABASE_PORT}
+    user: ${BOOKING_DATABASE_USER}
+    password: ${BOOKING_DATABASE_PASSWORD}
+    database: ${BOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: booking_confirm
+      to: booking_confirm
+    - from: si_confirm
+      to: si_confirm
+    - from: vgm_confirm
+      to: vgm_confirm
+booking_summary:
+  enable: ${TASK_BOOKING_SUMMARY_ENABLE}
+  source:
+    host: ${BOOKING_DATABASE_HOST}
+    port: ${BOOKING_DATABASE_PORT}
+    user: ${BOOKING_DATABASE_USER}
+    password: ${BOOKING_DATABASE_PASSWORD}
+    database: ${BOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: booking_summary
+      to: booking_summary
+booking_confirm_summary:
+  enable: ${TASK_BOOKING_CONFIRM_SUMMARY_ENABLE}
+  source:
+    host: ${BOOKING_DATABASE_HOST}
+    port: ${BOOKING_DATABASE_PORT}
+    user: ${BOOKING_DATABASE_USER}
+    password: ${BOOKING_DATABASE_PASSWORD}
+    database: ${BOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: booking_confirm_summary
+      to: booking_confirm_summary
+document_summary:
+  enable: ${TASK_DOCUMENT_SUMMARY_ENABLE}
+  source:
+    host: ${BOOKING_DATABASE_HOST}
+    port: ${BOOKING_DATABASE_PORT}
+    user: ${BOOKING_DATABASE_USER}
+    password: ${BOOKING_DATABASE_PASSWORD}
+    database: ${BOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: si_summary
+      to: si_summary
+    - from: vgm_summary
+      to: vgm_summary
+rate:
+  enable: ${TASK_RATE_ENABLE}
+  source:
+    host: ${PREBOOKING_DATABASE_HOST}
+    port: ${PREBOOKING_DATABASE_PORT}
+    user: ${PREBOOKING_DATABASE_USER}
+    password: ${PREBOOKING_DATABASE_PASSWORD}
+    database: ${PREBOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: rates
+      to: rates
+  batch_size: 1000
+route_schedule:
+  enable: ${TASK_ROUTE_SCHEDULE_ENABLE}
+  source:
+    host: ${EDI_DATABASE_HOST}
+    port: ${EDI_DATABASE_PORT}
+    user: ${EDI_DATABASE_USER}
+    password: ${EDI_DATABASE_PASSWORD}
+    database: ${EDI_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: edi_carrier_schedule
+      to: route_schedules
+  batch_size: 1000
+rate_provider:
+  enable: ${TASK_RATE_PROVIDER_ENABLE}
+  source:
+    host: ${PREBOOKING_DATABASE_HOST}
+    port: ${PREBOOKING_DATABASE_PORT}
+    user: ${PREBOOKING_DATABASE_USER}
+    password: ${PREBOOKING_DATABASE_PASSWORD}
+    database: ${PREBOOKING_DATABASE_NAME}
+    sslmode: disable
+  tables:
+    - from: providers
+      to: rate_providers

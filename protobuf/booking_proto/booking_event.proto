@@ -1,0 +1,671 @@
+// Messages of all the event get into the Kafka topic for bookkeeper.
+
+syntax = "proto3";
+package booking.proto;
+option go_package = "booking_proto";
+option java_package = "com.bluextrade.booking.proto";
+import "google/protobuf/wrappers.proto";
+
+message Booking {
+    reserved 3;
+    enum Function {
+        BOOKING_FUNCTION_UNKNOWN = 0;
+        BOOKING_FUNCTION_NEW = 1;
+        BOOKING_FUNCTION_UPDATE = 2;
+        BOOKING_FUNCTION_CANCEL = 3;
+    };
+
+    message ContainerRequest {
+        int64 quantity = 1;
+        ContainerType type = 2;
+        bool active_reefer = 3;
+        Temperature temperature = 4;
+        bool vent = 5;
+        AirFlow air_flow = 6;
+        google.protobuf.DoubleValue humidity = 7;
+        Measurement measurement = 8;
+    };
+
+    int64 platform_id = 1;  // The platform id of the user who create the first version of the document.
+    int64 created_by = 2;   // The user id of who create the document.
+    string application_number = 4;
+    int64 version = 5;
+    bool is_draft = 6;
+    Function function = 7;
+    string region = 8;
+    string carrier = 9;
+    string contract_number = 10;
+    string booking_number = 11;
+    string booking_agent = 12;
+    string remark = 13;
+    string email_notifications = 14; // "a@gmail.com, b@gmail.com"
+    References references = 15;
+    CarriageRequirement carriage_requirement = 16;
+    PaymentInformation payment_information = 17;
+    repeated Party parties = 18;
+    repeated ContainerRequest container_requests = 19;
+    repeated BookingCargo cargos = 20;
+    int64 timestamp = 21; // store timestamp when the document created.
+    bool is_deleted = 22; // mark the document is deleted or not
+    map<string, string> notes = 23;
+    repeated string bluex_numbers = 24; // for storing pre-booking numbers
+};
+
+message BookingConfirm {
+    message Container {
+        int64 quantity = 1;
+        ContainerType type = 2;
+    };
+
+    message Depot {
+        string depot = 1;
+        string company = 2;
+        int64 when = 3; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    }
+
+    string application_number = 1; // Application number is associated with Booking.
+    int64 version = 2;
+    string region = 3;
+    string carrier = 4;
+    string booking_number = 5;
+    string bl_number = 6;
+    ConfirmationFunction function = 7;
+    string contract_number = 8;
+    string response_code = 9;
+    CarrierContact carrier_contact = 10;
+    booking.proto.ServiceMode service_mode = 11;
+    string remark = 12;
+    repeated BookingCargo cargos = 13;
+    repeated Container containers = 14;
+    repeated Party parties = 15;
+    Vessel vessel = 16;
+    Vessel pre_vessel = 17;
+    FourP four_p = 18; // POR->POL->POD->PDL
+    int64 etd = 19; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 eta = 20; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    Depot pickup_depot = 21;
+    Depot return_depot = 22;
+    ServiceType service_type = 23;
+    int64 timestamp = 24;   // store timestamp when the document created.
+    string reason = 25;
+    string shipping_order_number = 26; // s/o number is used if exporting from Taiwan area
+    int64 container_cut_off_date = 27;
+    int64 si_cut_off_date = 28;
+    int64 vgm_cut_off_date = 29;
+};
+
+message SI {
+    reserved 3;
+    enum Function {
+        SI_FUNCTION_UNKNOWN = 0;
+        SI_FUNCTION_NEW = 1;
+        SI_FUNCTION_UPDATE = 2;
+        SI_FUNCTION_CANCEL = 3;
+    };
+
+    int64 platform_id = 1;  // The platform id of the user who create the first version of the document.
+    int64 created_by = 2;   // The user id of who create the document.
+    string application_number = 4;
+    int64 version = 5;
+    bool is_draft = 6;
+    string region = 7;
+    Function function = 8;
+    string carrier = 9;
+    string contract_number = 10;
+    string mlb_number = 11;
+    repeated Party parties = 12;
+    References references = 13;
+    CarriageRequirement carriage_requirement = 14;
+    PaymentInformation payment_information = 15;
+    BLPrintInstructions bl_print_instructions = 16;
+    repeated SICargo cargos = 17;
+    int64 timestamp = 18; // store timestamp when the document created.
+    bool is_deleted = 19; // mark the document is deleted or not
+    map<string, string> notes = 20;
+    string shipping_order_number = 21; // s/o number is used if exporting from Taiwan area
+};
+
+message SIConfirm {
+    reserved 16, 21;
+    string application_number = 1; // Application number is associated with SI.
+    int64 version = 2;
+    string region = 3;
+    ConfirmationFunction function = 4;
+    CarrierContact carrier_contact = 5;
+    string carrier = 6;
+    repeated SICargo cargos = 7;
+    repeated Party parties = 8;
+    repeated string booking_numbers = 9;
+    ServiceMode service_mode = 10;
+    ServiceType service_type = 11;
+    string contract_number = 12;
+    BLType bl_type = 13;
+    string bl_number = 14;
+    Location bl_issue_place = 15;
+    string consignee_order_number = 17;
+    string export_declaration = 18;
+    string currency = 19; //USD, EURO
+    Location payment_place = 20;
+    FourP four_p = 22; // POR->POL->POD->PDL
+    int64 etd = 23; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 eta = 24; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 actual_departure = 25;    // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 actual_arrival = 26;      // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    Vessel vessel = 27;
+    Vessel pre_vessel = 28;
+    int64 letter_of_credit_issue_date = 29; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 letter_of_credit_expired_date = 30;   // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 timestamp = 31;   // store timestamp when the document created.
+    PaymentInformation payment_information = 32;
+    string reason = 33;
+};
+
+message VGM {
+    reserved 3;
+    enum Function {
+        VGM_FUNCTION_UNKNOWN = 0;
+        VGM_FUNCTION_NEW = 1;
+        VGM_FUNCTION_UPDATE = 2;
+        VGM_FUNCTION_CANCEL = 3;
+    };
+
+    message Container {
+        string bluex_number = 1;
+        string booking_number = 2;
+        string container_number = 3;
+        ContainerType container_type = 4;
+        string seal_number = 5;
+        SealType seal_type = 6;
+        string measurement = 7; // SM1, SM2
+        int64 measurement_time = 8; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+        Weight vgm_weight = 9;      // Total weight of SM1
+        Weight cargo_weight = 10;   // Cargo Weight of SM2
+        Weight tare_weight = 11;    // Tare Weight of SM2
+    };
+
+    int64 platform_id = 1;  // The platform id of the user who create the first version of the document.
+    int64 created_by = 2;   // The user id of who create the document.
+    string application_number = 4;
+    int64 version = 5;
+    bool is_draft = 6;
+    string region = 7;
+    Function function = 8;
+    string carrier = 9;
+    string authorized_person_first_name = 10;
+    string authorized_person_last_name = 11;
+    repeated Party parties = 12;
+    repeated Container containers = 13;
+    int64 timestamp = 14; // store timestamp when the document created.
+    bool is_deleted = 15; // mark the document is deleted or not
+    map<string, string> notes = 16;
+};
+
+message VGMConfirm {
+    string application_number = 1;  // Associated with VGM.
+    int64 version =2;
+    string region = 3;
+    string carrier = 4;
+    ConfirmationFunction function = 5;
+    repeated BookingNumber booking_numbers = 6;
+    int64 timestamp = 7;   // store timestamp when the document created.
+    string bl_number = 8;
+    string reason = 9;
+
+    message BookingNumber {
+        string booking_number = 1;
+        string container_number = 2;
+    };
+};
+
+message CarrierSchedule {
+    message Route {
+        int64 routing_seq = 1;
+        Location port = 2;
+        int64 eta = 3; // Estimated arrival. It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+        int64 etd = 4; // Estimated departure. It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+        int64 ata = 5; // Actual arrival. It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+        int64 atd = 6; // Actual departure. It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+        string dml_flag = 7; //0:no change; 1:add; 3:update
+        int64 entry = 8; // The ith time the port is arrived.
+    };
+
+    message Vessel {
+        string bluex_vessel_id = 1;
+        string carrier = 2;
+        string service_line = 3;
+        string name = 4;
+        string lloyd_code = 6;
+    };
+
+    string region = 1;
+    string voyage = 2;
+    int64 serial_num = 3;
+    Vessel vessel = 4;
+    repeated Route routing = 5;
+};
+
+enum ContainerType {
+    CT_NA = 0;
+    CT_12GP = 1012; // 12' STANDARD DRY
+    CT_20GP = 1020; // 20' STANDARD DRY
+    CT_40GP = 1040; // 40' STANDARD DRY
+    CT_45GP = 1045; // 45' STANDARD DRY
+    CT_53GP = 1053; // 53' standard dry
+    CT_20HQ = 2020; // 20' HIGH CUBE
+    CT_40HQ = 2040; // 40' HIGH CUBE
+    CT_45HQ = 2045; // 45' HIGH CUBE
+    CT_48HQ = 2048; // 48' HIGH CUBE
+
+    CT_22AC = 3022; // 20' AIR CONTAINER
+    CT_40AC = 3040; // 40' AIR CONTAINER
+    CT_42B0 = 3142; // 40' BULK
+    CT_40BH = 4040; // 40' HIGH CUBE DRY BULK
+    CT_20BU = 5020; // 20' BULK
+    CT_20FC = 6020; // 20' FLAT (COLLAPSIBLE)
+    CT_40FC = 6040; // 40' FLAT (COLLAPSIBLE)
+    CT_40FF = 7040; // 40' FLAT (FIXED ENDS)
+    CT_40FH = 8040; // 40' HIGH CUBE FLAT (COLLAPSIBLE)
+    CT_20FR = 9020; // 20' FLAT RACK
+    CT_45FR = 9045; // 45' Platform (with fixed ends)
+    CT_20G0 = 10020; // 20' x 8' STANDARD DRY
+    CT_24G0 = 10024; // 20' x 9' OPEN TOP
+    CT_40G1 = 11040; // 40' HIGH CUBE HANGER CONTAINER RACK 1-TIER
+    CT_44G1 = 11044; // 40' x 9' STANDARD DRY
+    CT_22G2 = 12022; // 20' OPEN SIDE
+    CT_40G2 = 12040; // 40' HIGH CUBE HANGER CONTAINER RACK 2-TIER
+    CT_40G3 = 13040; // 40' HIGH CUBE HANGER CONTAINER RACK 3-TIER
+    CT_40G4 = 14040; // 40' HIGH CUBE HANGER CONTAINER RACK 4-TIER
+    CT_40GX = 15040; // 40' x 8'6" VENT SECTION < 25CM2
+    CT_20H1 = 16020; // 20' HANGER CONTAINER RACK 1-TIER
+    CT_40H1 = 16040; // 40'X8'6" HANGER CONATINER RACK 1-TIER
+    CT_20H2 = 17020; // 20' HANGER CONTAINER RACK 2-TIER
+    CT_40H2 = 17040; // 40'X8'6" HANGER CONATINER RACK 2-TIER
+    CT_20H3 = 18020; // 20' HANGER CONTAINER RACK 3-TIER
+    CT_40H3 = 18040; // 40'X8'6" HANGER CONATINER RACK 3-TIER
+    CT_20H4 = 19020; // 20' HANGER CONTAINER RACK 4-TIER
+    CT_40H4 = 19040; // 40'X8'6" HANGER CONATINER RACK 4-TIER
+    CT_20HG = 20020; // 20' STANDARD GARMENT HANGER CONTAINER
+    CT_40HG = 20040; // 40' STANDARD GARMENT HANGER CONTAINER
+    CT_20HH = 21020; // 20' Half Height General
+    CT_40HH = 21040; // 40' HIGH CUBE HANGER CONTAINER
+    CT_40HX = 22040; // 40' GP W/OUT TUNNEL - 9'6"
+    CT_20IH = 23020; // 20' HIGH CUBE ISULATED & HEATED
+    CT_40IH = 23040; // 40' INSULATED & HEATED
+    CT_20MU = 24020; // 20' GP WITH NITEC MOTHER UNIT
+    CT_40MU = 24040; // 40' GP WITH NITEC MOTHER UNIT
+    CT_40OH = 25040; // 40' HIGH CUBE OPEN TOP
+    CT_20OS = 26020; // 20' Open Side
+    CT_40OS = 26040; // 40' Open Side
+    CT_20OT = 27020; // 20' OPEN TOP
+    CT_40OT = 27040; // 40' OPEN TOP
+    CT_20P1 = 28020; // 20' x 8' FLAT (FIXED ENDS)
+    CT_45P1 = 28045; // 40' HIGH FLAT
+    CT_28P3 = 29028; // 20' x 4'3" FLAT (COLLAPSIBLE)
+    CT_42P4 = 30042; // 40' x 8'6" FLAT (COLLAPSIBLE)
+    CT_22P5 = 31022; // 20' x 8'6" PLATFORM (SKELETAL)
+    CT_46P5 = 31046; // 40' x 9'6" PLATFORM (SKELETAL)
+    CT_40PC = 32040; // 40' Platform (with incomplete superstructure)
+    CT_20PF = 33020; // 20' Platform (with fixed ends)
+    CT_40PF = 33040; // 40' Platform (with fixed ends)
+    CT_20PL = 34020; // 20' PLATFORM
+    CT_40PL = 34040; // 40' PLATFORM
+    CT_40PW = 35040; // 40' HIGH CUBE PALLETWIDE
+    CT_45PW = 35045; // 45' HIGH CUBE PALLETWIDE
+    CT_L5R0 = 35901; // 45' REEFER HIGH CUBE
+    CT_M2R0 = 35902; // 48' REEFER
+    CT_M5R0 = 35903; // 48' REEFER HIGH CUBE
+    CT_44R1 = 36044; // 40' x 9' REEFER
+    CT_25R2 = 37025; // 20' x 9'6" REEFER (SELF POWERED)
+    CT_42R3 = 38042; // 40' REEFER (DIESEL GEN.)
+    CT_45R3 = 38045; // 40' x 9'6" REEFER (SELF POWERED)
+    CT_22R9 = 39022; // 20' REEFER (NO FOOD)
+    CT_42R9 = 39042; // 40' x 8'6"  REEFER (NO FOOD)
+    CT_45R9 = 39045; // 40' x 9'6"  REEFER (NO FOOD)
+    CT_20RD = 40020; // 20' DRY REEFER
+    CT_40RD = 40040; // 40' DRY REEFER
+    CT_4HRD = 40140; // 40' HIGH CUBE DRY REEFER
+    CT_12RF = 41012; // 12' REEFER
+    CT_20RF = 41020; // 20' REEFER
+    CT_40RF = 41040; // 40' REEFER
+    CT_45RF = 41045; // 45' Reefer
+    CT_40RH = 42040; // 40' HIGH CUBE REEFER
+    CT_45RH = 42045; // 45' HIGH CUBE REEFER
+    CT_20RQ = 43020; // 20' HIGH CUBE REEFER
+    CT_22S3 = 44022; // 20' x 8'6" NAMED CARGO CONTAINER
+    CT_25S3 = 44025; // 20' x 9'6" NAMED CARGO CONTAINER
+    CT_40SR = 45040; // 40' SUPER RACK CONTAINER
+    CT_20T0 = 46020; // 20' x 8' TANK
+    CT_24T0 = 46024; // 20' x 9' TANK
+    CT_25T0 = 46025; // 20' x 9'6" TANK
+    CT_20T6 = 47020; // 20' x 8' TANK (DANGEROUS)
+    CT_22T6 = 47022; // 20' TANK (DANGEROUS)
+    CT_42T6 = 47042; // 40' TANK (DANGEROUS)
+    CT_45T6 = 47045; // 40' HIGH CUBE TANK (DANGEROUS)
+    CT_28T9 = 48028; // 20' x 4'3" TANK FOR GASES
+    CT_48T9 = 48048; // 40' x 4'3" TANK FOR GASES
+    CT_20TK = 49020; // 20' TANK
+    CT_40TK = 49040; // 40' TANK
+    CT_45TK = 49045; // 45' Tank (for non-dangerous liquids)
+    CT_24U0 = 50024; // 20' HIGH CUBE OPEN TOP
+    CT_28U0 = 50028; // 20' HALF HEIGHT OPEN TOP
+    CT_44U0 = 50044; // 40' x 9' OPEN TOP
+    CT_48U0 = 50048; // 40' HALF HEIGHT OPEN TOP
+    CT_L2U0 = 50102; // 45' OPEN TOP
+    CT_22U6 = 51022; // 20' HARDTOP
+    CT_42U6 = 51042; // 40' HARDTOP
+    CT_45U6 = 51045; // 40' HIGH CUBE  HARDTOP
+    CT_20VF = 52020; // 20' VENTILATED (FANTAINER)
+    CT_20VT = 53020; // 20' VENTILATED
+    CT_40VT = 53040; // 40' VENTILATED
+    CT_20XX = 54020; // 20' HH W/TUNNEL REEFER
+    CT_40XX = 54040; // 40' HALF HEIGHT W/TUNNEL REEFER
+};
+
+enum ServiceMode {
+    SERVICE_MODE_UNKNOWN = 0;
+    PORT_TO_PORT = 101;
+    PORT_TO_YARD = 102;
+    PORT_TO_DOOR = 103;
+    YARD_TO_PORT = 201;
+    YARD_TO_YARD = 202;
+    YARD_TO_DOOR = 203;
+    DOOR_TO_PORT = 301;
+    DOOR_TO_YARD = 302;
+    DOOR_TO_DOOR = 303;
+};
+
+enum ServiceType {
+    SERVICE_TYPE_UNKNOWN = 0;
+    SERVICE_FCL_FCL = 1;    // Full Container Load to Full Container Load
+    SERVICE_FCL_LCL = 2;    // FULL Container Load to Less than Container Load
+    SERVICE_LCL_FCL = 3;
+    SERVICE_LCL_LCL = 4;
+};
+
+enum BLType {
+    BL_TYPE_UNKNOWN = 0;
+    BL_TYPE_ORIGINAL = 1;
+    BL_TYPE_SEAWAY = 2;
+    BL_TYPE_HOUSE = 3;
+};
+
+message FourP {
+    Location place_of_receipt = 1;   // POR
+    Location port_of_loading = 2;    // POL
+    Location port_of_discharge = 3;  // POD
+    Location place_of_delivery = 4;  // PDL
+};
+
+message References {
+    string shippers_reference_number = 1;
+    string bl_reference_number = 2;
+    string purchase_order_number = 3;
+    string forwards_reference_number = 4;
+    string sid_number = 5;
+    string job_number = 6;
+    string consignee_reference_number = 7;
+    string transaction_reference_number = 8;
+    string tariff_number = 9;
+    string exporter_reference_number = 10;
+    string invoice_reference_number = 11;
+    string letter_of_credit_refernce = 12;
+    string broker_reference = 13;
+    string goverent_reference_or_fmc = 14;
+    string export_license_number = 15;
+    int64 letter_of_credit_issue_date = 16;     // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 letter_of_credit_expiry_date = 17;    // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 export_license_issue_date = 18;       // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 export_license_expiry_date = 19;      // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+};
+
+message CarriageRequirement {
+    Vessel vessel = 1;
+    int64 cut_off_date = 2;   // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    ServiceMode service_mode = 3;
+    ServiceType service_type = 4;
+    FourP four_p = 5; // POR->POL->POD->PDL
+    Location carrier_contact_office = 6;
+    Location bl_issue_place = 7;
+    Vessel pre_vessel = 8;
+    string debit_code = 9;
+    int64 etd = 10; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+    int64 eta = 11; // It's unix time, the unit is second from 1970 Jan 1 00:00:00 UTC.
+};
+
+message PaymentInformation {
+    google.protobuf.DoubleValue amount = 1;
+    string currency = 2; // USD, EURO, etc...
+    Location payment_place = 3;
+    string payment_term = 4;
+    string payer = 5;
+};
+
+message BLPrintInstructions {
+    BLType bl_type = 1; // origin, seaway, house
+    string bl_comment = 2;
+    int64 freighted_original_quantity = 3;
+    int64 freighted_copy_quantity = 4;
+    int64 un_freighted_original_quantity = 5;
+    int64 un_freighted_copy_quantity = 6;
+};
+
+message Contact {
+    string first_name = 1;
+    string last_name = 2;
+    string phone = 3;
+    string fax = 4;
+    string email = 5;
+    string address = 6;
+};
+
+message CarrierContact {
+    string name = 1;
+    string phone = 2;
+    string fax = 3;
+    string email = 4;
+};
+
+message Party {
+    enum Type {
+        PARTY_UNKNOWN = 0;
+        BOOKING = 1;
+        SHIPPER = 2;
+        CONSIGNEE = 3;
+        FORWARDER = 4;
+        NOTIFY_PARTY = 5;
+        ALSO_NOTIFY_PARTY = 6;
+        MORE_ALSO_NOTIFY_PARTY = 7;
+        CONTRACT_PARTY = 8;
+        FREIGHT_PAYER = 9;
+        SHIP_FROM = 10;
+        SHIP_TO = 11;
+        IMPORTER = 12;
+        BOOKER = 13;
+        CARRIER = 14;
+        WEIGHING_PARTY = 15;
+    };
+    Type type = 1;    // shipper, booking, consignee, forwarder
+    string company_name = 2;
+    Contact contact = 3;
+    string booking_id = 4;
+    CN24 cn24 = 5;
+    int64 company_id = 6;  // Bluex company id.
+};
+
+message CN24 {
+    enum CodeType {
+        CODE_UNKNOWN = 0;
+        ENTERPRISE_CODE = 1;
+        PASSPORT = 2;
+        PERSONAL_ID = 3;
+    };
+
+    CodeType type = 1;
+    string code = 2;
+    string country_code = 3;
+    string type_of_enterprise_code = 4;
+};
+
+message Location {
+    string code = 1;    // UN/LOCODE
+    string name = 2;
+}
+
+enum ConfirmationFunction {
+    CONFIRMATION_UNKNOWN = 0;
+    CONFIRMATION_ACCEPT = 1;
+    CONFIRMATION_UPDATE = 2;
+    CONFIRMATION_CANCEL_OR_REJECT = 3;
+    CONFIRMATION_ACK = 4;
+};
+
+enum TemperatureUnit {
+    TEMPERATURE_UNKNOWN = 0;
+    CELSIUS = 1;
+    FAHRENHEIT = 2;
+};
+
+enum AirFlowUnit {
+    AIRFLOW_UNKNOWN = 0;
+    CBM_PH = 1; // Cubic meters per hour
+    CBF_PM = 2; // Cubic feet per minute
+};
+
+enum VolumeUnit {
+    VOLUME_UNKNOWN = 0;
+    CBM = 1; // Cubic Meters
+    CBF = 2; // Cubit Feet
+};
+
+enum WeightUnit {
+    WEIGHT_UNKNOWN = 0;
+    KG = 1;
+    LB = 2;
+};
+
+enum MeasurementUnit {
+    MEATUREMENT_UNKNOWN = 0;
+    FET = 1;    // Feet
+    MTR = 2;    // Meter
+};
+
+enum PackageType {
+    PKG_UNKNOWN = 0;
+    PKG_CT = 1; // CARTONS
+    PKG_PC = 2; // PIECES
+    PKG_PK = 3; // PACKAGES
+    PKG_CS = 4; // CASES
+    PKG_BG = 5; // BAGS
+    PKG_BX = 6; // BOXES
+    PKG_CR = 7; // CRATES
+    PKG_RO = 8; // ROLLS
+    PKG_UN = 9; // UNITS
+    PKG_DR = 10; // DRUMS
+    PKG_BE = 11; // BUNDLES
+    PKG_BL = 12; // BALES
+    PKG_TK = 13; // TANKS
+    PKG_CL = 14; // COILS
+};
+
+enum SealType {
+    SEAL_UNKNOWN = 0;
+    SEAL_CARRIER = 1;
+    SEAL_SHIPPER = 2;
+    SEAL_QUARANTINE_AGENCY = 3;
+    SEAL_CUSTOMS = 4;
+    SEAL_TERMINAL_OPERATOR = 5;
+};
+
+message Temperature {
+    TemperatureUnit unit = 1;
+    double value = 2;
+};
+
+message AirFlow {
+    AirFlowUnit unit = 1;
+    double value = 2;
+};
+
+message Weight {
+    WeightUnit unit = 1;
+    double value = 2;
+};
+
+message Volume {
+    VolumeUnit unit = 1;
+    double value = 2;
+};
+
+message Measurement {
+    MeasurementUnit unit = 1;
+    double length = 2;
+    double width = 3;
+    double height = 4;
+};
+
+message Package {
+    PackageType type = 1;
+    int64 count = 2;
+    string name = 3; // eg. "CARTONS", "PIECES", "PACKAGES"
+};
+
+message BookingCargo {
+    string description = 1;
+    string hs_code = 2;
+    string marks = 3;   // Only SI has this field.
+    repeated DangerousGood dangerous_good = 4;
+    Package package = 5;
+    Volume volume = 6;
+    Weight weight = 7;
+};
+
+message SICargo {
+    message Container {
+        string bluex_number = 1;
+        string booking_number = 2;
+        string container_number = 3;
+        ContainerType container_type = 4;
+        string seal_number = 5;
+        SealType seal_type = 6;
+        bool active_reefer = 7;
+        Temperature temperature = 8;
+        bool vent = 9;
+        AirFlow air_flow = 10;
+        google.protobuf.DoubleValue humidity = 11;
+        Package package = 12;
+        Volume volume = 13;
+        Weight weight = 14;
+        bool soc = 15; // Shipper Owned Container
+        Measurement measurement = 16;
+    };
+
+    string description = 1;
+    string hs_code = 2;
+    string marks = 3;   // Only SI has this field.
+    repeated DangerousGood dangerous_good = 4;
+    repeated Container containers = 5;
+};
+
+message DangerousGood {
+    string imo_class1 = 1;
+    string imo_class2 = 2;
+    string imo_class3 = 3;
+    string udng_number = 4;
+    string hazard_page_number = 5;
+    string packing_group = 6;
+    Temperature flash_point = 7;
+    string ems_number = 8;
+    string trem_card_number = 9;
+    string aggregation_state = 10;
+    string hazard_code_version_number = 11;
+    string packing_details = 12;
+    string hazmat_comment = 13;
+    repeated Contact contacts = 14;
+};
+
+message Vessel {
+    string bluex_vessel_id = 1;
+    string name = 2;
+    string voyage = 3;
+    string lloyd_code = 4;
+};

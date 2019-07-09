@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package notifications;
+
+import "google/protobuf/timestamp.proto";
+
+// option go_package = "pkg/notifications";
+
+message Target {
+  uint32 platform_id = 1;
+  string uuid = 2;
+  string type = 3;
+  string name = 4;
+}
+
+message Sender {
+  uint32 platform_id = 1;
+  string uuid = 2;
+  string type = 3;
+  string name = 4;
+}
+
+message Notification {
+  string uuid = 1;
+  string subject = 2;
+  Target target = 3;
+  Sender sender = 4;
+  string source = 5;
+  string action = 6;
+  map<string, string> notes = 8;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message AddNotificationRequest {
+  Notification notification = 1;
+}
+
+message AddNotificationResponse {
+}
+
+message QueryNotificationsRequest {
+  int64 last_sync = 1;
+}
+
+message QueryNotificationsResponse {
+  int64 last_sync = 1;
+  repeated Notification notifications = 2;
+}
+
+
+service NotificationHub {
+  rpc add_notification (AddNotificationRequest) returns (AddNotificationResponse);
+  rpc query_notifications (QueryNotificationsRequest) returns (QueryNotificationsResponse);
+}

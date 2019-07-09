@@ -1,0 +1,748 @@
+syntax = "proto3";
+
+package booking;
+option go_package = "prebooking_proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+message Dictionary {
+  map<string, string> pairs = 1;
+}
+
+message Country {
+  string id = 1; // ISO 3166-1-alpha-2 code
+  string name = 2;
+}
+
+message Region {
+  int64 id = 1;
+  string name = 2;
+  string country_id = 3;
+}
+
+// Geo is represented as latitude-longitude pair in the E7 presentation
+// (degrees multiplied by 10^7 and rounded to the nearest integer).
+// Latitudes should be in the range +/- 90 degrees
+// Longitude should be in the range +/- 180 degrees
+message Geo {
+  int32 latitude = 1;
+  int32 longitude = 2;
+}
+
+message Location {
+  string code = 1; // UN/LOCODE
+  string name = 2;
+  Country country = 3;
+  Region region = 4;
+  Geo geo = 5;
+  string timezone = 6;
+}
+
+message Range {
+  int64 start = 1;
+  int64 end = 2;
+}
+
+message TimestampRange {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
+
+message Provider {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message Contract {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message EffectiveTime {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+}
+
+message Declaration {
+  string demurrage = 1;
+  string detention = 2;
+  string outport = 3;
+  string remarks = 4;
+  string included = 5;
+  string subject_to = 6;
+}
+
+message Promotion {
+  double discount = 1;
+  EffectiveTime effective_time = 2;
+}
+
+message ServiceFee {
+  double fee = 1;
+  EffectiveTime effective_time = 2;
+}
+
+message PricingInfo {
+  string currency = 1;
+  double exchange_rate = 2;
+  double price = 3;
+  double service_fee = 4;
+  Provider source = 5;
+  Contract contract = 6;
+  EffectiveTime effective_time = 7;
+  EffectiveTime fee_effective_time = 8;
+  Declaration declaration = 9;
+  ServiceMode service_mode = 10;
+  string commodity = 11;
+  Promotion promotion = 12;
+  bool no_service_fee = 13;
+}
+
+message Carrier {
+  int64 id = 1;
+  string name = 2;
+  string scac = 3;
+}
+
+message Vessel {
+  int64 id = 1;
+  string name = 2;
+  string imo = 3;
+}
+
+message Voyage {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message Route {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message RoutePoint {
+  Location location = 1;
+  google.protobuf.Timestamp atd = 2;
+  google.protobuf.Timestamp ata = 3;
+  google.protobuf.Timestamp etd = 4;
+  google.protobuf.Timestamp eta = 5;
+  google.protobuf.Timestamp cut_off_date = 6;
+}
+
+message Leg {
+  Location from = 1;
+  Location to = 2;
+  string transport_mode = 3;
+  int64 etd = 4;
+  int64 eta = 5;
+  string vessel_name = 6;
+  string voyage = 7;
+  string service_route = 8;
+}
+
+message Quote {
+  string id = 1;
+  Carrier carrier = 2;
+  Vessel vessel = 3;
+  Voyage voyage = 4;
+  Route route = 5;
+  Location place_of_receipt = 6;
+  Location place_of_delivery = 7;
+  google.protobuf.Timestamp etd = 8;
+  google.protobuf.Timestamp eta = 9;
+  google.protobuf.Timestamp cut_off_date = 10;
+  Range transit_time = 11;
+  repeated PricingInfo pricing_info = 12;
+  Location port_of_loading = 13;
+  Location port_of_discharge = 14;
+  repeated Leg legs = 15;
+  repeated ContainerType container_types = 16;
+  repeated int32 quantities = 17;
+  google.protobuf.Timestamp cargo_ready_date = 18;
+  string hs_code = 19;
+}
+
+enum NotificationGroupRole {
+  OTHERS = 0;
+  SHIPPER = 1;
+  CONSIGNEE = 2;
+  ACCOUNTREP = 3;
+  LOCALBOOKINGAGENT = 4;
+  CBD = 5;
+  SHIPPERSASSOC = 6;
+}
+
+message NotificationGroup {
+  NotificationGroupRole role = 1;
+  string name = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  bool is_sa_member = 6;
+}
+
+message NotificationGroupList {
+  repeated NotificationGroup notification_groups = 1;
+}
+
+enum PrebookingStatus {
+  NEW = 0;
+  PREBOOKING_SUBMITTED = 1;
+  PREBOOKING_REVIEWING = 2;
+  PREBOOKING_REJECTED = 10;
+  PREBOOKING_AMENDED = 15;
+  PREBOOKING_CONFIRMED = 20;
+  PREBOOKING_CANCELLED = 99;
+}
+
+enum BookingStatus {
+  BOOKING_UNKNOWN = 0;
+  BOOKING_DRAFT = 1;
+  BOOKING_SUBMITTED = 2;
+}
+
+enum SIStatus {
+  SI_UNKNOWN = 0;
+  SI_DRAFT = 1;
+  SI_SUBMITTED = 2;
+}
+
+enum VolumeUnitType {
+  VU_NONE = 0;
+  CBM = 1;
+  CBF = 2;
+}
+
+enum WeightUnitType {
+  WU_NONE = 0;
+  KG = 1;
+  LB = 2;
+}
+
+message UpdateHistory {
+  PrebookingStatus status = 1;
+  Quote quote = 3;
+  string shipment_name = 5;
+  uint32 update_platform_id = 6;
+  uint32 update_user_id = 7;
+  string update_user_name = 8;
+  repeated NotificationGroup notification_groups = 10;
+  uint32 volume = 13;
+  VolumeUnitType volume_unit = 14;
+  uint32 weight = 15;
+  WeightUnitType weight_unit = 16;
+  map<string, string> notes = 18;
+  google.protobuf.Timestamp updated_at = 20;
+  repeated Container containers = 21;
+  int64 updated_by_sa_user_id = 22;
+  int64 updated_by_sa_platform_id = 23;
+  int64 updated_by_sa_at = 24;
+  string remark = 25;
+}
+
+message UpdateHistoryList {
+  repeated UpdateHistory list = 1;
+}
+
+enum ContainerStatus {
+  UNKNOWN = 0;
+  ASSIGNED = 1;
+  REJECTED = 2;
+  ONHOLDED = 3;
+}
+
+message Container {
+  string id = 1;
+  ContainerStatus status = 2;
+  ContainerType type = 3;
+  string booking_no = 4;
+  string document = 5;
+  int64 updated_at = 6;
+  string reject_reason = 7;
+}
+
+message Prebooking {
+  string id = 1;               // The uuid of this pre-booking
+  PrebookingStatus status = 2; // The status of this pre-booking
+  Quote quote = 3;             // The quote used in this pre-booking
+  string shipment_name = 5;
+  uint32 update_platform_id = 6;
+  uint32 update_user_id = 7;
+  string update_user_name = 8;
+  repeated NotificationGroup notification_groups = 10; // List of notification groups ID in this pre-booking'
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  uint32 volume = 13;
+  VolumeUnitType volume_unit = 14;
+  uint32 weight = 15;
+  WeightUnitType weight_unit = 16;
+  map<string, string> notes = 18;
+  repeated UpdateHistory history = 20;
+  repeated uint32 booking_platform_ids = 22;
+  repeated Container containers = 23;
+  int64 updated_by_rbd_user_id = 24;
+  int64 updated_by_rbd_platform_id = 25;
+  int64 updated_by_rbd_at = 26;
+  repeated SAPrebookingAction sa_actions = 27;
+  repeated FFPrebookingAction ff_actions = 28;
+  BookingStatus booking_status = 29;
+  SIStatus si_status = 30;
+  string remark = 31; // RBD will write something to FF in this field.
+}
+
+message GetPortRequest {
+  string code = 1;
+}
+
+message GetPortResponse {
+  Location port = 1;
+}
+
+message GetPortsRequest {
+  // string search = 1;  now we return all ports back
+  string page_token = 2;
+  uint64 page_size = 3;
+  string order_by = 4;
+}
+
+message GetPortsResponse {
+  repeated Location ports = 1;
+}
+
+enum ContainerType {
+  CTNA = 0;
+  GP20 = 1020;
+  GP40 = 1040;
+  GP45 = 1045;
+  HQ20 = 2020;
+  HQ40 = 2040;
+  HQ45 = 2045;
+}
+
+/*
+ +------------+------+------------+------+
+ | From \ To  | Port | Ramp(Yard) | Door |
+ |------------|------|------------|------|
+ | Port       |  YY  |    YR      |  YD  |
+ | Ramp(Yard) |  RY  |    RR      |  RD  |
+ | Door       |  DY  |    DR      |  DD  |
+ +------------+------+------------+------+
+ */
+enum ServiceMode {
+  NA = 0;
+  YY = 101;
+  YR = 102;
+  YD = 103;
+  RY = 201;
+  RR = 202;
+  RD = 203;
+  DY = 301;
+  DR = 302;
+  DD = 303;
+}
+
+message GetQuoteRequest {
+  string quote_id = 1;
+}
+
+message GetQuoteResponse {
+  BookingServiceError error = 1;
+  Quote quote = 2;
+}
+
+enum TranshipFilter {
+  TS_UNKNOWN = 0;
+  TS_DIRECT = 1;
+  TS_TRANSHIPMENT = 2;
+};
+
+message GetQuotesRequest {
+  string place_of_receipt = 1;  // UN/LOCODE
+  string place_of_delivery = 2; // UN/LOCODE
+  string port_of_loading = 3;   // UN/LOCODE
+  string port_of_discharge = 4; // UN/LOCODE
+  repeated int32 quantities = 5;
+  repeated ContainerType container_types = 6;
+  google.protobuf.Timestamp cargo_ready_date = 7;
+  string hs_code = 8;
+  string commodity = 9;
+  ServiceMode service_mode = 10;
+  repeated int64 provider_ids = 11;
+  repeated TranshipFilter tranship_filters = 12;
+}
+
+message GetQuotesResponse {
+  repeated Quote quotes = 1;
+}
+
+message SubmitPrebookingRequest {
+  uint32 platform_id = 1;
+  string quote_id = 2;
+  string shipment_name = 4;
+  string source = 5;
+  string sender_id = 6;
+  string sender_name = 7;
+  string sender_type = 8;
+  repeated NotificationGroup notification_groups = 10;
+  uint32 volume = 13;
+  VolumeUnitType volume_unit = 14;
+  uint32 weight = 15;
+  WeightUnitType weight_unit = 16;
+  repeated uint32 booking_platform_ids = 20;
+  map<string, string> notes = 21;
+}
+
+message SubmitPrebookingResponse {
+  string id = 1;
+}
+
+message RoleEmailList {
+  NotificationGroupRole role = 1;
+  repeated string emails = 2;
+}
+
+enum SAPrebookingAction {
+  SA_UNKNOWN = 0;
+  SA_BOOKING = 1;     // A prebooking is submitted, no booking no. is assigned an no booking is associated with
+  SA_CREATE_SI = 2;   // When all containers have status ASSIGNED or REJECTED.
+  SA_ASSIGN = 3;      // When no container has status other than UNKNOWN.
+  SA_REASSIGN = 4;    // When some containers have status other than UNKNOWN.
+  SA_CANCEL = 5;      // When the prebooking is not canceled.
+  SA_REJECT = 6;      // When the prebooking is not canceled and not rejected.
+}
+
+enum FFPrebookingAction {
+  FF_UNKNOWN = 0;
+  FF_CANCEL = 1;  // A booking is not canceled.
+}
+
+enum PrebookingFilter {
+  PF_UNKNOWN = 0;
+  PF_REQUESTED = 1;
+  PF_CONFIRMED = 2;
+  PF_REJECTED = 3;
+  PF_CANCEL = 4;
+}
+
+message GetPrebookingsRequest {
+  string prebooking_id = 1;
+  uint32 platform_id = 2;
+  uint32 quote_provider_id = 14;
+  repeated PrebookingStatus with_status = 3;
+  TimestampRange etd_range = 5;
+  TimestampRange eta_range = 6;
+  repeated RoleEmailList roles_emails = 8;
+  uint32 page = 10;
+  uint32 page_size = 11;
+
+  bool filter_booking_platform = 12;
+  uint32 booking_platform_id = 13;
+  string search = 15;
+  repeated string carriers = 16;
+  repeated PrebookingFilter status_filters = 17;
+}
+
+message GetPrebookingsResponse {
+  repeated Prebooking prebookings = 1;
+  uint32 page = 10;
+  uint32 total = 11;
+  repeated PrebookingStatus all_status = 20;
+  TimestampRange etd_range = 21;
+  TimestampRange eta_range = 22;
+  repeated NotificationGroup notification_groups = 25;
+	uint32 requested = 26;
+	uint32 confirmed = 27;
+	uint32 rejected = 28;
+	uint32 canceled = 29;
+}
+
+message ChangePrebookingStatus {
+  PrebookingStatus status = 1; // The new status of this prebooking
+}
+
+message ChangeNotificationGroups {
+  repeated NotificationGroup notification_groups = 1;
+}
+
+message ChangePrebookingQuote {
+  string quote_id = 1;
+}
+
+message ChangeBookingPlatform {
+  repeated uint32 booking_platform_ids = 1;
+}
+
+message UpdatePrebookingRequest {
+  string prebooking_id = 1;
+  ChangePrebookingStatus change_status = 2;
+  ChangeNotificationGroups change_notification_groups = 3;
+  ChangePrebookingQuote change_quote = 4;
+  ChangeBookingPlatform change_booking_platform = 12;
+
+  uint32 sender_platform_id = 5;
+  string sender_id = 6;
+  string sender_name = 7;
+  string sender_type = 8;
+  map<string, string> notes = 10;
+}
+
+message UpdatePrebookingResponse {
+}
+
+message Rate {
+  string origin = 1;
+  string destination = 2;
+  string carrier_scac = 3;
+  string contract_number = 4;
+  string port_of_loading = 5;
+  string port_of_discharge = 6;
+  ContainerType container_type = 7;
+  double price = 8;
+  google.protobuf.Timestamp effective_date = 9;
+  google.protobuf.Timestamp expiry_date = 10;
+  double service_fee = 11;
+  string service_code = 12;
+  google.protobuf.Timestamp service_fee_effective_date = 13;
+  google.protobuf.Timestamp service_fee_expiry_date = 14;
+  string commodity = 15;
+  Declaration declaration = 16;
+  ServiceMode service_mode = 17;
+  double promotion_discount = 18;
+  google.protobuf.Timestamp promotion_effective_date = 19;
+  google.protobuf.Timestamp promotion_expiry_date = 20;
+}
+
+message Chunk {
+  bytes content = 1;
+}
+
+message UploadRateSheetRequest {
+  oneof data {
+    Provider provider = 1;
+    Chunk chunk = 2;
+    Rate rate = 3;
+  }
+}
+
+message UploadRateSheetResponse {
+  enum UploadStatusCode {
+    UNKNOWN = 0;
+    OK = 1;
+    FAILED = 2;
+  }
+  string message = 1;
+  UploadStatusCode code = 2;
+  int64 version = 3;
+}
+
+message GetRateSheetRequest {
+  string id = 1;
+  int64 version = 2;
+}
+
+message GetRateSheetResponse {
+  Rate rate = 1;
+}
+
+message CommitRateSheetRequest {
+  string id = 1;
+  int64 version = 2;
+}
+
+message CommitRateSheetResponse {
+  enum CommitStatusCode {
+    UNKNOWN = 0;
+    OK = 1;
+    FAILED = 2;
+  }
+  string message = 1;
+  CommitStatusCode code = 2;
+}
+
+message ImportRatesRequest {
+  string provider = 1;
+  string filename = 2;
+}
+message ImportRatesResponse {
+  string result = 1;
+}
+
+message WarmUpRequest {
+  message PortPair {
+    string origin = 1;
+    string destination = 2;
+  }
+  repeated PortPair ports = 1;
+}
+message WarmUpResponse {
+  message TimeRange {
+    int64 start_time = 1;
+    int64 end_time = 2;
+  }
+
+  message Result {
+    string place_of_receipt = 1;
+    string place_of_delivery = 2;
+    TimeRange time_range = 3;
+    BookingServiceError error = 4;
+  }
+  repeated Result results = 1;
+}
+
+message GetDownloadURLRequest {
+  string  container_id = 1;
+  string  file_key = 2;
+  bool    submitted = 3;
+}
+message GetDownloadURLResponse {
+  BookingServiceError error = 1;
+  string              url = 2;
+}
+
+message UploadDocumentRequest {
+  string  container_id = 1;
+  string  file_name = 2;
+  bytes   data = 3;
+}
+message UploadDocumentResponse {
+  BookingServiceError error = 1;
+  string              container_id = 2;
+  string              file_key = 3;
+}
+
+message ChangePrebookingContainer {
+  repeated ContainerType containers_to_add = 1;         // Specify the container types for new containers.
+  repeated string  containers_to_removed = 2;           // Use container_id to specify which container to be removed.
+  map<string, ContainerType> containers_to_change = 3;  // Specify which container to be changed to which container type.
+}
+
+message UpdateContainer {
+  reserved 6;
+  string container_id = 1;    // Which container to be updated.
+                              // If container_id is empty, this container will be add into the prebooking. The container_id
+                              // will be generated by the backend service.
+  ContainerStatus status = 2; // New status of the container.
+  string booking_no = 3;      // The booking number assigned to the container. The value is ignored if status is not ASSIGNED.
+  google.protobuf.StringValue document = 4;   // If the value is provied and is not an empty string, the document will be "submitted" to
+                                              // the container.
+                                              // If it's an empty string, the document will be disassociated from the container.
+  google.protobuf.StringValue reject_reason = 5; // If the value is provided, the reject_reason of the container will be updated.
+  // bool remove = 6;  // obsoluted // If the value is true, the container specified by container_id will be removed from a prebooking.
+  ContainerType container_type = 7; //
+}
+
+message UpdateContainerReq {
+  repeated UpdateContainer containers = 1;
+}
+
+message UpdateBookingAndSI {
+  google.protobuf.StringValue booking = 1;  // Application number of booking to be associated with the prebooking.
+  google.protobuf.StringValue si = 2;       // Application number of SI to be associated with the prebooking.
+}
+
+message UpdatePrebookingByRBDRequest {
+  string prebooking_id = 1;
+  int64 rbd_user_id = 2;
+  int64 rbd_platform_id = 3;
+  ChangePrebookingContainer change_container = 4;
+  UpdateContainerReq update_container = 5;
+  UpdateBookingAndSI update_booking_and_si = 6;
+  bool cancel_prebooking = 7; // If this is true, the prebooking will be cancled by RBD.
+  map<string, string> notes = 8;
+  ChangePrebookingQuote change_quote = 9;
+  string rbd_user_name = 10;
+  google.protobuf.StringValue remark = 11;
+}
+message UpdatePrebookingByRBDResponse {
+  BookingServiceError error = 1;
+}
+
+message BookingServiceError {
+  int32 code = 1;
+  string message = 2;
+}
+
+message SearchRateRequest {
+  string carrier = 1;
+  string vessel = 2;
+  string voyage = 3;
+  string place_of_receipt = 4;  // UN/LOCODE
+  string place_of_delivery = 5; // UN/LOCODE
+  string port_of_loading = 6;   // UN/LOCODE
+  string port_of_discharge = 7; // UN/LOCODE
+  repeated ContainerType container_types = 8;
+  repeated int32 quantities = 9;
+  int64 etd = 10;
+  int64 cut_off_date = 11;
+  string commodity = 12;
+  ServiceMode service_mode = 13;
+  int64 provider_id = 14;
+  google.protobuf.Timestamp cargo_ready_date = 15;
+  string hs_code = 16;
+  int64 eta = 17;
+  string route = 18;
+}
+
+message SearchRateResponse {
+  repeated Quote quotes = 1;
+}
+
+message RateInfo {
+  message ContainerPrice {
+    ContainerType container_type = 1;
+    double price = 2;
+  }
+  message RouteInfo {
+    string carrier = 1;
+    string place_of_receipt = 2;  // UN/LOCODE
+    string place_of_delivery = 3; // UN/LOCODE
+    string port_of_loading = 4;   // UN/LOCODE
+    string port_of_discharge = 5; // UN/LOCODE
+    string service_code = 6;
+    ServiceMode service_mode = 7;
+    string commodity = 8;
+    string hs_code = 9;
+  }
+  Provider provider = 1;
+  Contract contract = 2;
+  RouteInfo route_info = 3;
+  repeated ContainerPrice price = 5;
+  EffectiveTime effective_time = 6;
+  ServiceFee service_fee = 7;
+  Promotion promotion = 8;
+  Declaration declaration = 9;
+}
+
+message Commodity {
+  enum Enum {
+    UNKNOWN = 0;
+    GDSM = 1;
+    GARMENT = 2;
+    FURNITURE = 3;
+  }
+}
+
+
+service BookingService {
+  rpc GetPort(GetPortRequest) returns (GetPortResponse);
+  rpc GetPorts(GetPortsRequest) returns (GetPortsResponse);
+  rpc GetQuote(GetQuoteRequest) returns (GetQuoteResponse);
+  rpc GetQuotes(GetQuotesRequest) returns (GetQuotesResponse);
+  rpc SubmitPrebooking(SubmitPrebookingRequest) returns (SubmitPrebookingResponse);
+  rpc GetPrebookings(GetPrebookingsRequest) returns (GetPrebookingsResponse);
+  rpc UpdatePrebooking(UpdatePrebookingRequest) returns (UpdatePrebookingResponse);
+  rpc UpdatePrebookingByRBD(UpdatePrebookingByRBDRequest) returns (UpdatePrebookingByRBDResponse);
+  rpc UploadRateSheet(stream UploadRateSheetRequest) returns (UploadRateSheetResponse);
+  rpc GetRateSheet(GetRateSheetRequest) returns (stream GetRateSheetResponse);
+  rpc CommitRateSheet(CommitRateSheetRequest) returns (CommitRateSheetResponse);
+  rpc ImportRates(ImportRatesRequest) returns (ImportRatesResponse);
+  rpc WarmUp(WarmUpRequest) returns (WarmUpResponse);
+  rpc GetDownloadURL(GetDownloadURLRequest) returns (GetDownloadURLResponse);
+  rpc UploadDocument(UploadDocumentRequest) returns (UploadDocumentResponse);
+  rpc SearchRate(SearchRateRequest) returns (SearchRateResponse);
+}

@@ -1,0 +1,25 @@
+.drone.yml
+.editorconfig
+.git
+.gitignore
+.ipynb_checkpoints/*
+/notebooks/*
+/unused/*
+Dockerfile
+.DS_Store
+AUTHORS.md
+CONTRIBUTING.md
+LICENSE
+Makefile
+NOTICE
+README.md
+docker-compose.yml
+env.*
+/devops/*
+/vendor/*
+/deployment/*
+
+# To prevent storing dev/temporary container data
+*.csv
+/tmp/*
+

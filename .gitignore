@@ -1,0 +1,20 @@
+# Binaries for programs and plugins
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.mmdb
+*.gz
+*.out
+*.gem
+
+# Test binary, build with `go test -c`
+*.test
+
+.vscode
+vendor
+
+config/config.yml
+migrations/schema.sql
+
